@@ -7,7 +7,7 @@ import (
 )
 
 func BenchmarkSimulate(b *testing.B) {
-	var finalState State
+	var finalState *State
 	for i := 0; i < b.N; i++ {
 		// Games are reproducible, given the seed.
 		rand.Seed(42)

@@ -25,12 +25,11 @@ func main() {
 		canMove, move, diff := gums.Choose(s, currentPlayer, 5)
 		fmt.Printf("%v's turn: evaluates %.2f %v \n", currentPlayer, diff, canMove)
 		if canMove {
-			t := s.Play(currentPlayer, move)
+			s.Play(currentPlayer, move)
 			fmt.Println()
 			fmt.Println(t)
 			fmt.Println(t.Score())
 			fmt.Println(gums.Eval(t))
-			s = t
 		} else {
 			// TODO: detect when neither can move?
 		}

@@ -7,7 +7,7 @@ import (
 // Choose returns the best move *for this player*, the desirability of the outcome
 // *for this player*, and whether a move *by this player* is possible at all.
 // The desirability is computed even if this player can't move
-func Choose(s State, player Player, depth int) (canMove bool, move position, desirability float64) {
+func Choose(s *State, player Player, depth int) (canMove bool, move position, desirability float64) {
 	if depth < 1 {
 		panic(depth)
 	}
@@ -51,16 +51,17 @@ func Choose(s State, player Player, depth int) (canMove bool, move position, des
 	bestmove := position{}
 	ok := false
 	for _, move := range moves {
-		t := s.Play(player, move)
+		t := *s
+		t.Play(player, move)
 		if depth == 1 {
-			desi := Desirability(t, player)
+			desi := Desirability(&t, player)
 			if !ok || desi > bestdesi {
 				bestdesi = desi
 				bestmove = move
 				ok = true
 			}
 		} else {
-			_, _, oppodesi := Choose(t, player.Opponent(), depth-1)
+			_, _, oppodesi := Choose(&t, player.Opponent(), depth-1)
 			desi := -oppodesi
 			if !ok || desi > bestdesi {
 				bestdesi = desi

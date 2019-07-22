@@ -23,7 +23,7 @@ const W = 8
 // - p has a 0 if occupied by Green, 1 if occupied by Red
 type State struct{ filled, p uint64 }
 
-func (s State) At(i, j int) Content {
+func (s *State) At(i, j int) Content {
 	k := flatten(i, j)
 	switch {
 	case !hasbit(s.filled, k):
@@ -37,24 +37,17 @@ func (s State) At(i, j int) Content {
 	}
 }
 
-func (s State) Set(i, j int, c Content) State {
+func (s *State) Set(i, j int, c Content) {
 	k := flatten(i, j)
 	switch c {
 	case Empty:
-		return State{
-			filled: clearbit(s.filled, k),
-			p:      s.p,
-		}
+		s.filled = clearbit(s.filled, k)
 	case Green:
-		return State{
-			filled: setbit(s.filled, k),
-			p:      clearbit(s.p, k),
-		}
+		s.filled = setbit(s.filled, k)
+		s.p = clearbit(s.p, k)
 	case Red:
-		return State{
-			filled: setbit(s.filled, k),
-			p:      setbit(s.p, k),
-		}
+		s.filled = setbit(s.filled, k)
+		s.p = setbit(s.p, k)
 	default:
 		panic(c)
 	}
@@ -76,7 +69,7 @@ func hasbit(x uint64, k uint) bool {
 	return x&(1<<k) != 0
 }
 
-func (s State) CanPlay(player Player, pos position) bool {
+func (s *State) CanPlay(player Player, pos position) bool {
 	if player != Green && player != Red {
 		panic(player)
 	}
@@ -91,7 +84,7 @@ func (s State) CanPlay(player Player, pos position) bool {
 	return false
 }
 
-func (s State) CanCapture(player Player, pos position, dir direction) bool {
+func (s *State) CanCapture(player Player, pos position, dir direction) bool {
 	adjpos, ok := pos.move(dir)
 	if !ok {
 		return false
@@ -116,7 +109,7 @@ func (s State) CanCapture(player Player, pos position, dir direction) bool {
 	}
 }
 
-func (s State) Capture(player Player, pos position, dir direction) (State, int) {
+func (s *State) Capture(player Player, pos position, dir direction) int {
 	adjpos, ok := pos.move(dir)
 	if !ok {
 		panic("bug")
@@ -126,29 +119,28 @@ func (s State) Capture(player Player, pos position, dir direction) (State, int) 
 		panic("bug")
 	case player:
 		// Sandwich closed
-		return s, 0
+		return 0
 	case Empty:
 		// No sandwich??
 		panic("bug")
 	case player.Opponent():
-		rec, n := s.Capture(player, adjpos, dir)
-		rec = rec.Set(adjpos.i, adjpos.j, player)
-		return rec, 1 + n
+		n := s.Capture(player, adjpos, dir)
+		s.Set(adjpos.i, adjpos.j, player)
+		return 1 + n
 	}
 }
 
-func (s State) Play(player Player, pos position) State {
-	t := s.Set(pos.i, pos.j, player)
+func (s *State) Play(player Player, pos position) {
+	s.Set(pos.i, pos.j, player)
 
 	for _, dir := range directions {
 		if s.CanCapture(player, pos, dir) {
-			t, _ = t.Capture(player, pos, dir)
+			s.Capture(player, pos, dir)
 		}
 	}
-	return t
 }
 
-func (s State) PossibleMoves(player Player) (options []position) {
+func (s *State) PossibleMoves(player Player) (options []position) {
 	for i := 0; i < W; i++ {
 		for j := 0; j < W; j++ {
 			pos := makepos(i, j)
@@ -202,12 +194,12 @@ func (player Player) Opponent() Player {
 	return 3 - player
 }
 
-func InitialState() State {
-	var s State
-	s = s.Set(3, 3, Green)
-	s = s.Set(3, 4, Red)
-	s = s.Set(4, 3, Red)
-	s = s.Set(4, 4, Green)
+func InitialState() *State {
+	s := &State{}
+	s.Set(3, 3, Green)
+	s.Set(3, 4, Red)
+	s.Set(4, 3, Red)
+	s.Set(4, 4, Green)
 	return s
 	// return State{
 	// 	3: [W]Content{3: Green, 4: Red},
@@ -223,7 +215,7 @@ func (c Content) String() string {
 	}[c]
 }
 
-func (s State) String() string {
+func (s *State) String() string {
 	var sb strings.Builder
 	for i := 0; i < W; i++ {
 		for j := 0; j < W; j++ {
@@ -235,7 +227,7 @@ func (s State) String() string {
 	return sb.String()
 }
 
-func (s State) Score() (green int, red int) {
+func (s *State) Score() (green int, red int) {
 	var n [3]int
 	for i := 0; i < W; i++ {
 		for j := 0; j < W; j++ {
