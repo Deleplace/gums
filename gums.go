@@ -20,7 +20,7 @@ const W = 8
 
 type State [W][W]Content
 
-func (s *State) CanPlay(player Player, pos position) bool {
+func (s State) CanPlay(player Player, pos position) bool {
 	if player != Green && player != Red {
 		panic(player)
 	}
@@ -35,7 +35,7 @@ func (s *State) CanPlay(player Player, pos position) bool {
 	return false
 }
 
-func (s *State) CanCapture(player Player, pos position, dir direction) bool {
+func (s State) CanCapture(player Player, pos position, dir direction) bool {
 	adjpos, ok := pos.move(dir)
 	if !ok {
 		return false
@@ -60,7 +60,7 @@ func (s *State) CanCapture(player Player, pos position, dir direction) bool {
 	}
 }
 
-func (s *State) Capture(player Player, pos position, dir direction) int {
+func (s State) Capture(player Player, pos position, dir direction) (State, int) {
 	adjpos, ok := pos.move(dir)
 	if !ok {
 		panic("bug")
@@ -70,30 +70,30 @@ func (s *State) Capture(player Player, pos position, dir direction) int {
 		panic("bug")
 	case player:
 		// Sandwich closed
-		return 0
+		return s, 0
 	case Empty:
 		// No sandwich??
 		panic("bug")
 	case player.Opponent():
-		rec := s.Capture(player, adjpos, dir)
-		s[adjpos.i][adjpos.j] = player
-		return 1 + rec
+		rec, n := s.Capture(player, adjpos, dir)
+		rec[adjpos.i][adjpos.j] = player
+		return rec, 1 + n
 	}
 }
 
-func (s *State) Play(player Player, pos position) State {
-	t := *s
+func (s State) Play(player Player, pos position) State {
+	t := s
 	t[pos.i][pos.j] = player
 
 	for _, dir := range directions {
 		if s.CanCapture(player, pos, dir) {
-			(&t).Capture(player, pos, dir)
+			t, _ = t.Capture(player, pos, dir)
 		}
 	}
 	return t
 }
 
-func (s *State) PossibleMoves(player Player) (options []position) {
+func (s State) PossibleMoves(player Player) (options []position) {
 	for i, row := range s {
 		for j := range row {
 			pos := makepos(i, j)
@@ -162,7 +162,7 @@ func (c Content) String() string {
 	}[c]
 }
 
-func (s *State) String() string {
+func (s State) String() string {
 	var sb strings.Builder
 	for _, row := range s {
 		for _, c := range row {
@@ -173,7 +173,7 @@ func (s *State) String() string {
 	return sb.String()
 }
 
-func (s *State) Score() (green int, red int) {
+func (s State) Score() (green int, red int) {
 	var n [3]int
 	for _, row := range s {
 		for _, c := range row {

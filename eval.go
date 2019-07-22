@@ -13,7 +13,7 @@ var coef = [W][W]float64{
 
 // Eval computes a "desirability" of a given state, for each player.
 // This is not the same as the final score, where each cell counts for 1.
-func Eval(s *State) (green float64, red float64) {
+func Eval(s State) (green float64, red float64) {
 	for i, row := range s {
 		for j, c := range row {
 			switch c {
@@ -27,7 +27,7 @@ func Eval(s *State) (green float64, red float64) {
 	return
 }
 
-func Desirability(s *State, player Player) float64 {
+func Desirability(s State, player Player) float64 {
 	g, r := Eval(s)
 	switch player {
 	case Green:
