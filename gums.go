@@ -45,12 +45,12 @@ func (s State) Set(i, j int, c Content) State {
 			filled: clearbit(s.filled, k),
 			p:      s.p,
 		}
-	case Red:
+	case Green:
 		return State{
 			filled: setbit(s.filled, k),
 			p:      clearbit(s.p, k),
 		}
-	case Green:
+	case Red:
 		return State{
 			filled: setbit(s.filled, k),
 			p:      setbit(s.p, k),
