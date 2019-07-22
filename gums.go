@@ -173,7 +173,7 @@ func (s *State) String() string {
 	return sb.String()
 }
 
-func (s *State) Score() (int, int) {
+func (s *State) Score() (green int, red int) {
 	var n [3]int
 	for _, row := range s {
 		for _, c := range row {

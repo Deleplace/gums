@@ -2,35 +2,40 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 
 	"github.com/Deleplace/gums"
 )
 
 func main() {
+	// Fix randomness source.
+	// The only randomness use is the shuffling of the possible moves, to make
+	// them equiprobable.
+	// There is no map iteration (non-deterministic).
+	// There is no concurrency (which may be non-deterministic).
+	//
+	// Games are reproducible, given the seed.
+	rand.Seed(420004)
+
 	s := gums.InitialState()
 	fmt.Println(&s)
-	/*
-		moves := (&s).PossibleMoves(gums.Green)
-		for _, move := range moves {
-			t := (&s).Play(gums.Green, move)
+	currentPlayer := gums.Green
+
+	for k := 0; k < 64; k++ {
+		canMove, move, diff := gums.Choose(&s, currentPlayer, 5)
+		fmt.Printf("%v's turn: evaluates %.2f %v \n", currentPlayer, diff, canMove)
+		if canMove {
+			t := (&s).Play(currentPlayer, move)
 			fmt.Println()
 			fmt.Println(&t)
 			fmt.Println(t.Score())
 			fmt.Println(gums.Eval(&t))
+			s = t
+		} else {
+			// TODO: detect when neither can move?
 		}
-		fmt.Println()
-	*/
-	currentPlayer := gums.Green
-
-	for k := 0; k < 30; k++ {
-		move, diff, ok := gums.Choose(&s, currentPlayer, 7)
-		fmt.Printf("%v's turn: evaluates %.2f %v", currentPlayer, diff, ok)
-		t := (&s).Play(currentPlayer, move)
-		fmt.Println()
-		fmt.Println(&t)
-		fmt.Println(t.Score())
-		fmt.Println(gums.Eval(&t))
-		s = t
 		currentPlayer = currentPlayer.Opponent()
 	}
+	g, r := s.Score()
+	fmt.Printf("\nFinal score %d %d \n", g, r)
 }
