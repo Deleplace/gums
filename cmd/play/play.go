@@ -17,24 +17,25 @@ func main() {
 	// Games are reproducible, given the seed.
 	rand.Seed(420004)
 
+	player := gums.NewMinimax(4)
 	s := gums.InitialState()
 	fmt.Println(s)
-	currentPlayer := gums.Green
+	currentColor := gums.Green
 
 	for k := 0; k < 64; k++ {
-		canMove, move, diff := gums.Choose(s, currentPlayer, 5)
-		fmt.Printf("%v's turn: evaluates %.2f %v \n", currentPlayer, diff, canMove)
+		canMove, move := player.Choose(currentColor, s)
+		// fmt.Printf("%v's turn: evaluates %.2f %v \n", currentColor, diff, canMove)
 		if canMove {
-			t := s.Play(currentPlayer, move)
+			t := s.Play(currentColor, move)
 			fmt.Println()
 			fmt.Println(t)
 			fmt.Println(t.Score())
-			fmt.Println(gums.Eval(t))
+			// fmt.Println(player.eval(t))
 			s = t
 		} else {
 			// TODO: detect when neither can move?
 		}
-		currentPlayer = currentPlayer.Opponent()
+		currentColor = currentColor.Opponent()
 	}
 	g, r := s.Score()
 	fmt.Printf("\nFinal score %d %d \n", g, r)

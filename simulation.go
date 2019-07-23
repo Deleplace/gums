@@ -2,18 +2,25 @@ package gums
 
 // 2 opponents, using minimax.
 
-func simulate(depth int) State {
+func fight(g, r Player) State {
 	s := InitialState()
-	currentPlayer := Green
+	players := [...]Player{
+		Green: g,
+		Red:   r,
+	}
+	currentColor := Green
+	currentPlayer := g
+
 	for k := 0; k < 64; k++ {
-		canMove, move, _ := Choose(s, currentPlayer, depth)
+		canMove, move := currentPlayer.Choose(currentColor, s)
 		if canMove {
-			t := s.Play(currentPlayer, move)
+			t := s.Play(currentColor, move)
 			s = t
 		} else {
 			// TODO: detect when neither can move?
 		}
-		currentPlayer = currentPlayer.Opponent()
+		currentColor = currentColor.Opponent()
+		currentPlayer = players[currentColor]
 	}
 	return s
 }

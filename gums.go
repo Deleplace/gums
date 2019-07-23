@@ -13,7 +13,7 @@ const (
 	Red
 )
 
-type Player = Content
+type PlayerColor = Content
 
 // The grid is 8x8 == 64 cells
 const W = 8
@@ -76,7 +76,7 @@ func hasbit(x uint64, k uint) bool {
 	return x&(1<<k) != 0
 }
 
-func (s State) CanPlay(player Player, pos position) bool {
+func (s State) CanPlay(player PlayerColor, pos position) bool {
 	if player != Green && player != Red {
 		panic(player)
 	}
@@ -91,7 +91,7 @@ func (s State) CanPlay(player Player, pos position) bool {
 	return false
 }
 
-func (s State) CanCapture(player Player, pos position, dir direction) bool {
+func (s State) CanCapture(player PlayerColor, pos position, dir direction) bool {
 	adjpos, ok := pos.move(dir)
 	if !ok {
 		return false
@@ -116,7 +116,7 @@ func (s State) CanCapture(player Player, pos position, dir direction) bool {
 	}
 }
 
-func (s State) Capture(player Player, pos position, dir direction) (State, int) {
+func (s State) Capture(player PlayerColor, pos position, dir direction) (State, int) {
 	adjpos, ok := pos.move(dir)
 	if !ok {
 		panic("bug")
@@ -137,7 +137,7 @@ func (s State) Capture(player Player, pos position, dir direction) (State, int) 
 	}
 }
 
-func (s State) Play(player Player, pos position) State {
+func (s State) Play(player PlayerColor, pos position) State {
 	t := s.Set(pos.i, pos.j, player)
 
 	for _, dir := range directions {
@@ -148,7 +148,7 @@ func (s State) Play(player Player, pos position) State {
 	return t
 }
 
-func (s State) PossibleMoves(player Player) (options []position) {
+func (s State) PossibleMoves(player PlayerColor) (options []position) {
 	for i := 0; i < W; i++ {
 		for j := 0; j < W; j++ {
 			pos := makepos(i, j)
@@ -198,7 +198,7 @@ func (pos position) move(dir direction) (position, bool) {
 	return newpos, ok
 }
 
-func (player Player) Opponent() Player {
+func (player PlayerColor) Opponent() PlayerColor {
 	return 3 - player
 }
 

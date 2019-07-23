@@ -4,10 +4,28 @@ import (
 	"math"
 )
 
-// Choose returns the best move *for this player*, the desirability of the outcome
+type Minimax struct {
+	depth int
+	eval  evaluator
+}
+
+func NewMinimax(depth int) Minimax {
+	return Minimax{
+		depth: depth,
+		eval:  newEvaluator(&coef_1),
+	}
+}
+
+// Choose returns the best move *for this player*, and whether a move *by this player* is possible at all.
+func (mm Minimax) Choose(color PlayerColor, s State) (canMove bool, move position) {
+	ok, move, _ := mm.Dig(s, color, mm.depth)
+	return ok, move
+}
+
+// Dig returns the best move *for this player color*, the desirability of the outcome
 // *for this player*, and whether a move *by this player* is possible at all.
 // The desirability is computed even if this player can't move
-func Choose(s State, player Player, depth int) (canMove bool, move position, desirability float64) {
+func (mm Minimax) Dig(s State, player PlayerColor, depth int) (canMove bool, move position, desirability float64) {
 	if depth < 1 {
 		panic(depth)
 	}
@@ -34,11 +52,11 @@ func Choose(s State, player Player, depth int) (canMove bool, move position, des
 			return false, position{}, desirability
 		case depth == 1:
 			// End of recursion. Let's provide an estimate.
-			desi := Desirability(s, player)
+			desi := Desirability(s, player, mm.eval)
 			return false, position{}, desi
 		default:
 			// The opponent may move
-			oppoCanMove, _, oppoDesi := Choose(s, player.Opponent(), depth-1)
+			oppoCanMove, _, oppoDesi := mm.Dig(s, player.Opponent(), depth-1)
 			if !oppoCanMove {
 				panic("inconsistent")
 			}
@@ -53,14 +71,14 @@ func Choose(s State, player Player, depth int) (canMove bool, move position, des
 	for _, move := range moves {
 		t := s.Play(player, move)
 		if depth == 1 {
-			desi := Desirability(t, player)
+			desi := Desirability(t, player, mm.eval)
 			if !ok || desi > bestdesi {
 				bestdesi = desi
 				bestmove = move
 				ok = true
 			}
 		} else {
-			_, _, oppodesi := Choose(t, player.Opponent(), depth-1)
+			_, _, oppodesi := mm.Dig(t, player.Opponent(), depth-1)
 			desi := -oppodesi
 			if !ok || desi > bestdesi {
 				bestdesi = desi
