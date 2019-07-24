@@ -50,4 +50,5 @@ func TestDepth(t *testing.T) {
 		}
 	}
 	fmt.Println(ng, nr)
+	fmt.Println("Hits =", hits, "Missed =", missed)
 }

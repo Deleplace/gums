@@ -148,14 +148,26 @@ func (s State) Play(player PlayerColor, pos position) State {
 	return t
 }
 
+// Memoization of legit moves
+var memoPossibleMoves = map[State][]position{}
+var hits, missed = 0, 0
+
 func (s State) PossibleMoves(player PlayerColor) (options []position) {
-	for i := 0; i < W; i++ {
-		for j := 0; j < W; j++ {
-			pos := makepos(i, j)
-			if s.CanPlay(player, pos) {
-				options = append(options, pos)
+	options, known := memoPossibleMoves[s]
+
+	if !known {
+		missed++
+		for i := 0; i < W; i++ {
+			for j := 0; j < W; j++ {
+				pos := makepos(i, j)
+				if s.CanPlay(player, pos) {
+					options = append(options, pos)
+				}
 			}
 		}
+		memoPossibleMoves[s] = options
+	} else {
+		hits++
 	}
 
 	// Shuffle :)
