@@ -54,7 +54,16 @@ func Desirability(s State, player PlayerColor, eval evaluator) float64 {
 type evaluator func(s State) (green float64, red float64)
 
 func newEvaluator(coef *[W][W]float64) evaluator {
+	// Memoization of evaluations
+	memo := map[State][2]float64{}
+
 	return func(s State) (green float64, red float64) {
-		return Eval(s, coef)
+		if values, known := memo[s]; known {
+			return values[0], values[1]
+		}
+
+		green, red = Eval(s, coef)
+		memo[s] = [2]float64{green, red}
+		return
 	}
 }
