@@ -17,7 +17,7 @@ func NewMinimax(depth int) Minimax {
 }
 
 // Choose returns the best move *for this player*, and whether a move *by this player* is possible at all.
-func (mm Minimax) Choose(color PlayerColor, s State) (canMove bool, move position) {
+func (mm Minimax) Choose(color PlayerColor, s State) (canMove bool, move Position) {
 	ok, move, _ := mm.Dig(s, color, mm.depth)
 	return ok, move
 }
@@ -25,7 +25,7 @@ func (mm Minimax) Choose(color PlayerColor, s State) (canMove bool, move positio
 // Dig returns the best move *for this player color*, the desirability of the outcome
 // *for this player*, and whether a move *by this player* is possible at all.
 // The desirability is computed even if this player can't move
-func (mm Minimax) Dig(s State, player PlayerColor, depth int) (canMove bool, move position, desirability float64) {
+func (mm Minimax) Dig(s State, player PlayerColor, depth int) (canMove bool, move Position, desirability float64) {
 	if depth < 1 {
 		panic(depth)
 	}
@@ -49,11 +49,11 @@ func (mm Minimax) Dig(s State, player PlayerColor, depth int) (canMove bool, mov
 			if player == Red {
 				desirability = -desirability
 			}
-			return false, position{}, desirability
+			return false, Position{}, desirability
 		case depth == 1:
 			// End of recursion. Let's provide an estimate.
 			desi := Desirability(s, player, mm.eval)
-			return false, position{}, desi
+			return false, Position{}, desi
 		default:
 			// The opponent may move
 			oppoCanMove, _, oppoDesi := mm.Dig(s, player.Opponent(), depth-1)
@@ -61,12 +61,12 @@ func (mm Minimax) Dig(s State, player PlayerColor, depth int) (canMove bool, mov
 				panic("inconsistent")
 			}
 			desi := -oppoDesi
-			return false, position{}, desi
+			return false, Position{}, desi
 		}
 	}
 
 	bestdesi := minusInfinity
-	bestmove := position{}
+	bestmove := Position{}
 	ok := false
 	for _, move := range moves {
 		t := s.Play(player, move)

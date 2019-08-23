@@ -76,11 +76,11 @@ func hasbit(x uint64, k uint) bool {
 	return x&(1<<k) != 0
 }
 
-func (s State) CanPlay(player PlayerColor, pos position) bool {
+func (s State) CanPlay(player PlayerColor, pos Position) bool {
 	if player != Green && player != Red {
 		panic(player)
 	}
-	if s.At(pos.i, pos.j) != Empty {
+	if s.At(pos.I, pos.J) != Empty {
 		return false
 	}
 	for _, dir := range directions {
@@ -91,12 +91,12 @@ func (s State) CanPlay(player PlayerColor, pos position) bool {
 	return false
 }
 
-func (s State) CanCapture(player PlayerColor, pos position, dir direction) bool {
+func (s State) CanCapture(player PlayerColor, pos Position, dir direction) bool {
 	adjpos, ok := pos.move(dir)
 	if !ok {
 		return false
 	}
-	if s.At(adjpos.i, adjpos.j) != player.Opponent() {
+	if s.At(adjpos.I, adjpos.J) != player.Opponent() {
 		return false
 	}
 
@@ -104,7 +104,7 @@ func (s State) CanCapture(player PlayerColor, pos position, dir direction) bool 
 	if !ok {
 		return false
 	}
-	switch s.At(nextpos.i, nextpos.j) {
+	switch s.At(nextpos.I, nextpos.J) {
 	case Empty:
 		return false
 	case player:
@@ -116,12 +116,12 @@ func (s State) CanCapture(player PlayerColor, pos position, dir direction) bool 
 	}
 }
 
-func (s State) Capture(player PlayerColor, pos position, dir direction) (State, int) {
+func (s State) Capture(player PlayerColor, pos Position, dir direction) (State, int) {
 	adjpos, ok := pos.move(dir)
 	if !ok {
 		panic("bug")
 	}
-	switch s.At(adjpos.i, adjpos.j) {
+	switch s.At(adjpos.I, adjpos.J) {
 	default:
 		panic("bug")
 	case player:
@@ -132,13 +132,13 @@ func (s State) Capture(player PlayerColor, pos position, dir direction) (State, 
 		panic("bug")
 	case player.Opponent():
 		rec, n := s.Capture(player, adjpos, dir)
-		rec = rec.Set(adjpos.i, adjpos.j, player)
+		rec = rec.Set(adjpos.I, adjpos.J, player)
 		return rec, 1 + n
 	}
 }
 
-func (s State) Play(player PlayerColor, pos position) State {
-	t := s.Set(pos.i, pos.j, player)
+func (s State) Play(player PlayerColor, pos Position) State {
+	t := s.Set(pos.I, pos.J, player)
 
 	for _, dir := range directions {
 		if s.CanCapture(player, pos, dir) {
@@ -148,7 +148,7 @@ func (s State) Play(player PlayerColor, pos position) State {
 	return t
 }
 
-func (s State) PossibleMoves(player PlayerColor) (options []position) {
+func (s State) PossibleMoves(player PlayerColor) (options []Position) {
 	for i := 0; i < W; i++ {
 		for j := 0; j < W; j++ {
 			pos := makepos(i, j)
@@ -166,12 +166,12 @@ func (s State) PossibleMoves(player PlayerColor) (options []position) {
 	return options
 }
 
-type position struct{ i, j int }
+type Position struct{ I, J int }
 
-func makepos(i, j int) position {
-	return position{
-		i: i,
-		j: j,
+func makepos(i, j int) Position {
+	return Position{
+		I: i,
+		J: j,
 	}
 }
 
@@ -188,13 +188,13 @@ var directions = []direction{
 	{1, -1},
 }
 
-func (pos position) move(dir direction) (position, bool) {
-	newpos := position{
-		i: pos.i + dir.di,
-		j: pos.j + dir.dj,
+func (pos Position) move(dir direction) (Position, bool) {
+	newpos := Position{
+		I: pos.I + dir.di,
+		J: pos.J + dir.dj,
 	}
-	ok := newpos.i >= 0 && newpos.i < W &&
-		newpos.j >= 0 && newpos.j < W
+	ok := newpos.I >= 0 && newpos.I < W &&
+		newpos.J >= 0 && newpos.J < W
 	return newpos, ok
 }
 
